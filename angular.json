@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "store": {
+    "delta-store": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -40,15 +40,12 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/store",
+            "outputPath": "dist/delta-store",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.css"
@@ -92,10 +89,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "store:build:production"
+              "browserTarget": "delta-store:build:production"
             },
             "development": {
-              "browserTarget": "store:build:development"
+              "browserTarget": "delta-store:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -103,7 +100,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "store:build"
+            "browserTarget": "delta-store:build"
           }
         }
       }
