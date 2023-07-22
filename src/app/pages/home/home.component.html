@@ -4,5 +4,9 @@
   <mat-drawer mode="side" opened class="p-6">
     <div>Filters</div>
   </mat-drawer>
-  <mat-drawer-content class="p-6"> </mat-drawer-content>
+  <mat-drawer-content class="p-6">
+    <app-products-header (columnsCountChange)="onColumnsCountChange($event)">
+    </app-products-header>
+    {{ cols }}
+  </mat-drawer-content>
 </mat-drawer-container>
