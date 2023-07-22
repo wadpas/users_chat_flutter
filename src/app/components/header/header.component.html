@@ -1,5 +1,5 @@
-<mat-toolbar class="max-w-7xl mx-auto border-x justify-between">
-  <a routerLink="home">
+<mat-toolbar class="max-w-7xl mx-auto border-x justify-between shadow">
+  <a routerLink="home" class="shadow">
     <img src="/assets/logo.svg" style="height: 100px" />
   </a>
   <button mat-icon-button [mat-menu-trigger-for]="menu">
@@ -30,12 +30,12 @@
         <span class="font-bold">{{ "450" | currency }}</span>
       </div>
       <div class="pt-3 flex justify-between">
-        <button class="bg-red-600 text-white rounded-full w-9 h-9">
+        <button class="bg-red-600 text-white rounded-md w-9 h-9">
           <mat-icon>remove_shopping_cart</mat-icon>
         </button>
         <button
           routerLink="cart"
-          class="bg-green-600 text-white rounded-full w-9 h-9">
+          class="bg-green-600 text-white rounded-md w-9 h-9">
           <mat-icon>remove_shopping_cart</mat-icon>
         </button>
       </div>
