@@ -1,9 +1,11 @@
 <mat-toolbar
-  class="max-w-7xl mx-auto border-x justify-between shadow"
-  style="background-color: lightsteelblue">
-  <a routerLink="home" class="shadow">
-    <img src="/assets/logo.svg" style="height: 117px" />
-  </a>
+  class="max-w-7xl mx-auto border-x justify-between"
+  style="background-color: steelblue">
+  <div>
+    <a routerLink="home">
+      <img src="/assets/logo.svg" />
+    </a>
+  </div>
   <button mat-icon-button [mat-menu-trigger-for]="menu">
     <mat-icon [matBadge]="2" matBadgeColor="warn">shopping_cart</mat-icon>
   </button>
