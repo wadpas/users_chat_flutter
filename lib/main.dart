@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:users_chat_flutter/screens/chat.dart';
+import 'package:users_chat_flutter/screens/splash.dart';
 import 'firebase_options.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -8,7 +11,6 @@ import 'package:users_chat_flutter/screens/auth.dart';
 final colorScheme = ColorScheme.fromSeed(
   brightness: Brightness.light,
   seedColor: const Color.fromARGB(255, 102, 6, 247),
-  background: const Color.fromARGB(255, 56, 49, 66),
 );
 
 final theme = ThemeData().copyWith(
@@ -46,7 +48,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Great Places',
       theme: theme,
-      home: const AuthScreens(),
+      home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (ctx, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SplashScreen();
+            }
+            if (snapshot.hasData) {
+              return const ChatScreen();
+            }
+            return const AuthScreens();
+          }),
     );
   }
 }
