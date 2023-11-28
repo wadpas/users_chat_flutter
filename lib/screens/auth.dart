@@ -1,13 +1,9 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:users_chat_flutter/services/auth_service.dart';
 import 'package:users_chat_flutter/widgets/user_image_picker.dart';
-import 'package:path/path.dart' as path;
-
-final _firebase = FirebaseAuth.instance;
 
 class AuthScreens extends StatefulWidget {
   const AuthScreens({super.key});
@@ -17,73 +13,110 @@ class AuthScreens extends StatefulWidget {
 }
 
 class _AuthScreensState extends State<AuthScreens> {
-  final _form = GlobalKey<FormState>();
-  var _isLogin = true;
-  var _enteredEmail = '';
-  var _enteredPassword = '';
-  var _enteredUsername = '';
+  final auth = AuthService();
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
   File? _selectedImage;
+  var _isLogin = true;
   var _isAuthenticating = false;
-
-  void _submit() async {
-    final bool isValid = _form.currentState!.validate();
-
-    if (!isValid || !_isLogin && _selectedImage == null) {
-      return;
-    }
-
-    _form.currentState!.save();
-
-    try {
-      setState(() {
-        _isAuthenticating = true;
-      });
-      if (_isLogin) {
-        final userCredential = await _firebase.signInWithEmailAndPassword(
-          email: _enteredEmail,
-          password: _enteredPassword,
-        );
-      } else {
-        final userCredential = await _firebase.createUserWithEmailAndPassword(
-          email: _enteredEmail,
-          password: _enteredPassword,
-        );
-
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child(userCredential.user!.uid)
-            .child(path.basename(_selectedImage!.path));
-
-        await storageRef.putFile(_selectedImage!);
-        final imageUrl = await storageRef.getDownloadURL();
-
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userCredential.user!.uid)
-            .set({
-          'username': _enteredUsername,
-          'email': _enteredEmail,
-          'image_url': imageUrl,
-        });
-      }
-    } on FirebaseAuthException catch (error) {
-      if (error.code == 'email-already-in-use:') {}
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error.message ?? 'Authentication failed'),
-        ),
-      );
-      setState(
-        () {
-          _isAuthenticating = false;
-        },
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
+    final emailFormField = TextFormField(
+      decoration: const InputDecoration(
+        labelText: 'Email',
+      ),
+      keyboardType: TextInputType.emailAddress,
+      autocorrect: false,
+      textCapitalization: TextCapitalization.none,
+      controller: _emailController,
+      validator: (value) {
+        if (value == null || value.trim().isEmpty || !value.contains('@')) {
+          return 'Please enter a valid email address';
+        }
+        return null;
+      },
+    );
+
+    final usernameFormField = TextFormField(
+      decoration: const InputDecoration(
+        labelText: 'Username',
+      ),
+      enableSuggestions: false,
+      controller: _usernameController,
+      validator: (value) {
+        if (value == null || value.trim().length < 4) {
+          return 'Please enter a valid username';
+        }
+        return null;
+      },
+    );
+
+    final passwordFormField = TextFormField(
+      decoration: const InputDecoration(
+        labelText: 'Password',
+      ),
+      obscureText: true,
+      controller: _passwordController,
+      validator: (value) {
+        if (value == null || value.trim().length < 6) {
+          return 'Password must be at least 6 characters long';
+        }
+        return null;
+      },
+    );
+
+    final signInCreateEmailPassword = ElevatedButton(
+      onPressed: () async {
+        try {
+          setState(() {
+            _isAuthenticating = true;
+          });
+          if (_formKey.currentState!.validate()) {
+            _isLogin
+                ? await auth.signInEmailPassword(
+                    email: _emailController.text,
+                    password: _passwordController.text,
+                  )
+                : await auth.createEmailPassword(
+                    email: _emailController.text,
+                    username: _usernameController.text,
+                    password: _passwordController.text,
+                    image: _selectedImage,
+                  );
+          }
+        } on FirebaseAuthException catch (e) {
+          setState(() => _isAuthenticating = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.message!),
+            ),
+          );
+        } catch (e) {
+          setState(() => _isAuthenticating = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Authentication failed'),
+            ),
+          );
+        }
+      },
+      child: _isLogin ? const Text('Login') : const Text('Register'),
+    );
+
+    final toggleButton = TextButton(
+      onPressed: () {
+        setState(() {
+          _isLogin = !_isLogin;
+        });
+      },
+      child: Text(
+        _isLogin ? 'Create an account' : 'I have an account',
+      ),
+    );
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       body: Center(
@@ -102,7 +135,7 @@ class _AuthScreensState extends State<AuthScreens> {
                   child: Padding(
                     padding: const EdgeInsets.all(25),
                     child: Form(
-                      key: _form,
+                      key: _formKey,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -112,80 +145,14 @@ class _AuthScreensState extends State<AuthScreens> {
                                 _selectedImage = pickedImage;
                               },
                             ),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: 'Email Address',
-                            ),
-                            keyboardType: TextInputType.emailAddress,
-                            autocorrect: false,
-                            textCapitalization: TextCapitalization.none,
-                            validator: (value) {
-                              if (value == null ||
-                                  value.trim().isEmpty ||
-                                  !value.contains('@')) {
-                                return 'Please enter a valid email address';
-                              }
-                              return null;
-                            },
-                            onSaved: (value) {
-                              _enteredEmail = value!;
-                            },
-                          ),
-                          if (!_isLogin)
-                            TextFormField(
-                              decoration:
-                                  const InputDecoration(labelText: 'Username'),
-                              enableSuggestions: false,
-                              validator: (value) {
-                                if (value == null ||
-                                    value.trim().isEmpty ||
-                                    value.trim().length < 4) {
-                                  return 'Enter a valid username';
-                                }
-                                return null;
-                              },
-                              onSaved: (value) {
-                                _enteredUsername = value!;
-                              },
-                            ),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: 'Password',
-                            ),
-                            obscureText: true,
-                            validator: (value) {
-                              if (value == null || value.trim().length < 6) {
-                                return 'Password must be at least 6 characters long';
-                              }
-                              return null;
-                            },
-                            onSaved: (value) {
-                              _enteredPassword = value!;
-                            },
-                          ),
+                          emailFormField,
+                          if (!_isLogin) usernameFormField,
+                          passwordFormField,
                           const SizedBox(height: 12),
                           if (_isAuthenticating)
                             const CircularProgressIndicator(),
-                          if (!_isAuthenticating)
-                            ElevatedButton(
-                              onPressed: _submit,
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer),
-                              child: Text(_isLogin ? 'Login' : 'Signup'),
-                            ),
-                          if (!_isAuthenticating)
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _isLogin = !_isLogin;
-                                });
-                              },
-                              child: Text(_isLogin
-                                  ? 'Create an account'
-                                  : 'I have an account'),
-                            )
+                          if (!_isAuthenticating) signInCreateEmailPassword,
+                          if (!_isAuthenticating) toggleButton
                         ],
                       ),
                     ),
