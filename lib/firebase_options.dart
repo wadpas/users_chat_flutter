@@ -53,10 +53,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDIwkme_5Z_cvSv38o2ODkR3pve6Fmg6q4',
-    appId: '1:185169416759:android:76b27062591d2af2a225b2',
-    messagingSenderId: '185169416759',
-    projectId: 'users-chat-flutter',
-    storageBucket: 'users-chat-flutter.appspot.com',
+    apiKey: 'AIzaSyDNXUxHqUA_WwADui2-IcvYQLPp-UvjrVY',
+    appId: '1:708060883662:android:225af5aeeebc5fbff6be9f',
+    messagingSenderId: '708060883662',
+    projectId: 'comon-database-8a85d',
+    databaseURL: 'https://comon-database-8a85d-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'comon-database-8a85d.appspot.com',
   );
 }

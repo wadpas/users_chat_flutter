@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:users_chat_flutter/widgets/user_image_picker.dart';
+import 'package:path/path.dart' as path;
 
 final _firebase = FirebaseAuth.instance;
 
@@ -50,8 +51,8 @@ class _AuthScreensState extends State<AuthScreens> {
 
         final storageRef = FirebaseStorage.instance
             .ref()
-            .child('user_images')
-            .child('${userCredential.user!.uid}.jpg');
+            .child(userCredential.user!.uid)
+            .child(path.basename(_selectedImage!.path));
 
         await storageRef.putFile(_selectedImage!);
         final imageUrl = await storageRef.getDownloadURL();
@@ -73,9 +74,11 @@ class _AuthScreensState extends State<AuthScreens> {
           content: Text(error.message ?? 'Authentication failed'),
         ),
       );
-      setState(() {
-        _isAuthenticating = false;
-      });
+      setState(
+        () {
+          _isAuthenticating = false;
+        },
+      );
     }
   }
 

@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:users_chat_flutter/screens/chat.dart';
-import 'package:users_chat_flutter/screens/splash.dart';
 import 'firebase_options.dart';
 
+import 'package:users_chat_flutter/screens/chat.dart';
+import 'package:users_chat_flutter/screens/splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:users_chat_flutter/screens/auth.dart';
 
